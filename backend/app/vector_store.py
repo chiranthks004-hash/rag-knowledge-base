@@ -17,19 +17,19 @@ We load the OpenAI API key from the .env file (never hardcoded).
 
 import os
 from dotenv import load_dotenv
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_chroma import Chroma
 
-load_dotenv()  # reads the .env file (still used later for the LLM call itself)
+load_dotenv()  # reads the .env file (used later for the LLM API key)
 
 CHROMA_DIR = os.getenv("CHROMA_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "chroma_store"))
 os.makedirs(CHROMA_DIR, exist_ok=True)
 
-# A free, local embedding model — runs on your own laptop, no API key
-# or billing needed. "all-MiniLM-L6-v2" is small, fast, and widely
-# used for exactly this kind of project. The first time this runs,
-# it downloads the model (~80MB) once; after that it's cached locally.
-embedding_function = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# fastembed runs on ONNX Runtime instead of full PyTorch — same idea as
+# sentence-transformers (free, local, no API key), but with a much
+# smaller memory footprint. This matters on memory-constrained hosts
+# like Render's free tier (512MB), where PyTorch alone can exceed the limit.
+embedding_function = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 
 # This is our single collection of vectors, persisted to disk in
 # chroma_store/ so it survives server restarts.
