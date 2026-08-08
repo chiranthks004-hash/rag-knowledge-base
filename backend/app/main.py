@@ -10,6 +10,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+import os
 
 from app.database import engine, Base, get_db
 from app import models  # noqa: F401  (import registers the models with Base)
@@ -26,12 +27,12 @@ app = FastAPI(title="Enterprise AI Knowledge Base (RAG)")
 # Allows the React frontend (running on a different port, localhost:5173)
 # to call this API. Without this, the browser blocks the requests as a
 # security measure (CORS = Cross-Origin Resource Sharing).
+default_origins = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+cors_origins = os.getenv("CORS_ORIGINS", default_origins).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-      allow_origins=[
-        "http://localhost:5173", "http://127.0.0.1:5173",
-        "http://localhost:3000", "http://127.0.0.1:3000",
-    ],
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
