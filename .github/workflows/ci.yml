@@ -1,0 +1,54 @@
+# Runs automatically on every push and pull request. This is what
+# "CI" (Continuous Integration) means in practice: a fresh, clean
+# machine checks that your code actually installs and imports
+# correctly, catching mistakes before they reach anyone else (or
+# before you forget you broke something).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check backend imports cleanly
+        env:
+          GROQ_API_KEY: dummy-key-for-ci-import-check
+        run: python -c "import app.main"
+
+  frontend-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build

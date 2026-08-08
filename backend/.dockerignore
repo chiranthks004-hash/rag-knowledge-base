@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.pyc
+.env
+app.db
+chroma_store/
+app/uploaded_files/*
+!app/uploaded_files/.gitkeep

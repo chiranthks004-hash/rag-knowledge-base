@@ -1,0 +1,35 @@
+# Runs the whole app with one command: docker compose up
+#
+# This starts two containers:
+#   - backend:  FastAPI + ChromaDB + SQLite, on port 8000
+#   - frontend: the built React app served by nginx, on port 3000
+#
+# Data (uploaded files, the SQLite DB, the vector store) is kept in
+# named volumes so it survives container restarts — without this,
+# every "docker compose down" would wipe your uploaded documents.
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATA_DIR=/app/data
+      - CHROMA_DIR=/app/data/chroma_store
+      - UPLOAD_DIR=/app/data/uploaded_files
+    volumes:
+      - backend_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_data:
